@@ -1,0 +1,13 @@
+{
+  "name": "Casanova",
+  "short_name": "Casanova",
+  "description": "Your personal EQ coach",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#FEFCF9",
+  "theme_color": "#E94560",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
