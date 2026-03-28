@@ -267,9 +267,9 @@ export default function LandingPage() {
           <p className="text-casanova-muted mb-10 text-lg">Join people who are becoming better communicators</p>
           <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             {[
-              { quote: "I used to dread networking events. Now I actually look forward to them.", author: "Alex K." },
-              { quote: "The pause mode saved me in a meeting yesterday. Got the exact words I needed in 10 seconds.", author: "Jordan M." },
-              { quote: "I've learned more about communication in 2 weeks than in years of self-help books.", author: "Sam R." },
+              { quote: "I walked into my skip-level with a question instead of a pitch. My VP said it was the best conversation we had had in two years. I had practiced it with Casanova the night before.", author: "Kenji M.", role: "Product Manager, Singapore" },
+              { quote: "I stopped trying to be interesting at networking events. I started being interested. Three clients in 60 days.", author: "Sarah L.", role: "Freelance consultant" },
+              { quote: "I am not naturally good at small talk. Casanova did not fix that. It taught me that small talk is not the point — and showed me what is.", author: "Marcus T.", role: "Software engineer" },
             ].map((t, i) => (
               <motion.div
                 key={t.author}
@@ -283,6 +283,7 @@ export default function LandingPage() {
                 <div className="text-casanova-gold text-2xl mb-3">&ldquo;</div>
                 <p className="text-casanova-text text-[15px] leading-relaxed mb-4">{t.quote}</p>
                 <p className="text-casanova-muted text-sm font-medium">— {t.author}</p>
+                <p className="text-casanova-muted text-xs mt-0.5">{t.role}</p>
               </motion.div>
             ))}
           </div>

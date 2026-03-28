@@ -60,13 +60,12 @@ export default function TryPage() {
     setStreamingContent('');
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch('/api/aha', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          session_id: 'aha-moment',
           message: userMsg.content,
-          is_ephemeral: false,
+          history: messages.map(m => ({ role: m.role, content: m.content })),
         }),
       });
 
@@ -87,7 +86,7 @@ export default function TryPage() {
       setStreamingContent('');
       setExchangeCount(prev => prev + 1);
 
-      if (exchangeCount >= 1) {
+      if (exchangeCount >= 2) {
         setTimeout(() => setShowSignup(true), 1500);
       }
     } catch {
