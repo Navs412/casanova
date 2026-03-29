@@ -17,11 +17,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Casanova — Your Personal EQ Coach",
-  description: "Learn the art of human connection. Casanova is an AI coach that helps you communicate better with anyone — in dating, at work, in friendships, everywhere.",
+  title: "Casanova — AI Coach for High-Stakes Conversations",
+  description: "Casanova preps you before, saves you during, and sharpens you after any conversation. The secret weapon for meetings, networking, dates, and more.",
   openGraph: {
-    title: "Casanova — The Confidence You Wish You Had",
-    description: "An AI coach that teaches you how to genuinely connect with anyone. Try it free.",
+    title: "Casanova — Stop Leaving Your Best Conversations to Chance",
+    description: "AI conversation coach with Prep, Pause, and Debrief modes. The only app that coaches you mid-conversation.",
   },
   manifest: "/manifest.json",
 };

@@ -7,34 +7,25 @@
   --font-mono: var(--font-geist-mono);
   --font-serif: "Georgia", "Times New Roman", serif;
 
-  /* Casanova Design Tokens */
-  --color-casanova-bg: #FEFCF9;
-  --color-casanova-surface: #FFF8F0;
-  --color-casanova-text: #1A1A2E;
-  --color-casanova-muted: #6B7280;
+  /* Casanova Design Tokens — Premium Dark */
+  --color-casanova-bg: #0A0A0F;
+  --color-casanova-surface: #13131A;
+  --color-casanova-card: #1A1A24;
+  --color-casanova-text: #F0F0F5;
+  --color-casanova-muted: #8888A0;
   --color-casanova-accent: #E94560;
-  --color-casanova-accent-soft: #FEE2E8;
+  --color-casanova-accent-glow: rgba(233,69,96,0.15);
+  --color-casanova-accent-soft: rgba(233,69,96,0.1);
   --color-casanova-blue: #0F3460;
   --color-casanova-gold: #D4A843;
   --color-casanova-success: #27AE60;
-  --color-casanova-border: #E5E0D8;
-
-  /* Dark mode tokens */
-  --color-casanova-dark-bg: #1A1A1E;
-  --color-casanova-dark-surface: #2A2A2E;
-  --color-casanova-dark-text: #F5F0E8;
+  --color-casanova-border: rgba(255,255,255,0.08);
+  --color-casanova-navy: #0F3460;
 }
 
 :root {
-  --background: #FEFCF9;
-  --foreground: #1A1A2E;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1A1A1E;
-    --foreground: #F5F0E8;
-  }
+  --background: #0A0A0F;
+  --foreground: #F0F0F5;
 }
 
 body {
@@ -58,8 +49,35 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-casanova-border);
+  background: rgba(255,255,255,0.15);
   border-radius: 3px;
+}
+
+/* Animated gradient orbs for hero */
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(60px, -40px) scale(1.1); }
+  66% { transform: translate(-30px, 30px) scale(0.95); }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-50px, 30px) scale(1.05); }
+  66% { transform: translate(40px, -50px) scale(0.9); }
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, 50px) scale(1.08); }
+  66% { transform: translate(-60px, -20px) scale(0.92); }
+}
+.orb-1 { animation: orbFloat1 20s ease-in-out infinite; }
+.orb-2 { animation: orbFloat2 25s ease-in-out infinite; }
+.orb-3 { animation: orbFloat3 18s ease-in-out infinite; }
+
+/* Glassmorphic nav */
+.nav-glass {
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: rgba(10, 10, 15, 0.7);
 }
 
 /* Typing dots animation */
