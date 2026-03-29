@@ -562,7 +562,7 @@ export default function LandingPage() {
             Start free. Upgrade when Casanova proves its value.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-[700px] mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-[960px] mx-auto">
             {/* Free tier */}
             <motion.div
               initial="hidden"
@@ -612,7 +612,7 @@ export default function LandingPage() {
               </span>
               <h3 className="text-lg font-bold mb-1">Pro</h3>
               <p className="text-3xl font-bold mb-4">
-                $12<span className="text-sm font-normal text-casanova-muted">/mo</span>
+                $9.99<span className="text-sm font-normal text-casanova-muted">/mo</span>
               </p>
               <ul className="space-y-2.5 text-sm text-casanova-muted mb-6">
                 <li className="flex items-start gap-2">
@@ -637,6 +637,45 @@ export default function LandingPage() {
                 className="block text-center px-6 py-3 bg-casanova-accent text-white font-semibold rounded-xl hover:bg-casanova-accent/90 transition-all shadow-lg shadow-casanova-accent/20 active:scale-[0.98]"
               >
                 Start your 7-day free trial &rarr;
+              </Link>
+            </motion.div>
+
+            {/* Annual tier */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              custom={2}
+              className="relative p-7 rounded-2xl bg-casanova-card border border-casanova-border"
+            >
+              <span className="absolute top-4 right-4 text-[10px] font-bold tracking-widest uppercase text-casanova-gold bg-casanova-gold/10 px-3 py-1 rounded-full">
+                Save 33%
+              </span>
+              <h3 className="text-lg font-bold mb-1">Annual</h3>
+              <p className="text-3xl font-bold mb-1">
+                $79.99<span className="text-sm font-normal text-casanova-muted">/yr</span>
+              </p>
+              <p className="text-xs text-casanova-muted mb-4">~$6.67/mo — two months free</p>
+              <ul className="space-y-2.5 text-sm text-casanova-muted mb-6">
+                <li className="flex items-start gap-2">
+                  <span className="text-casanova-success mt-0.5">&#10003;</span>
+                  Everything in Pro
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-casanova-success mt-0.5">&#10003;</span>
+                  Two months free
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-casanova-success mt-0.5">&#10003;</span>
+                  7-day free trial included
+                </li>
+              </ul>
+              <Link
+                href="/try"
+                className="block text-center px-6 py-3 border border-casanova-gold/40 text-casanova-gold font-semibold rounded-xl hover:bg-casanova-gold/10 transition-all"
+              >
+                Get Annual &rarr;
               </Link>
             </motion.div>
           </div>
