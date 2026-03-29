@@ -117,14 +117,14 @@ export default function ChatBubble({ role, content, isStreaming, timestamp }: Ch
             {coachingData.observation && (
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-casanova-muted uppercase tracking-wider">What you did</span>
-                <p className="text-[15px] text-casanova-text whitespace-pre-wrap leading-relaxed">{renderMarkdown(coachingData.observation)}</p>
+                <p className="text-[15px] text-casanova-text whitespace-pre-wrap leading-relaxed">{renderMarkdown(coachingData.observation.replace(/^what you did[:\s]*/i, '').replace(/^observation[:\s]*/i, ''))}</p>
               </div>
             )}
             
             {coachingData.reframe && (
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-casanova-accent uppercase tracking-wider">Try this instead</span>
-                <p className="text-[15px] text-white whitespace-pre-wrap leading-relaxed">{renderMarkdown(coachingData.reframe)}</p>
+                <p className="text-[15px] text-white whitespace-pre-wrap leading-relaxed">{renderMarkdown(coachingData.reframe.replace(/^try this instead[:\s]*/i, '').replace(/^reframe[:\s]*/i, ''))}</p>
               </div>
             )}
             
@@ -139,7 +139,7 @@ export default function ChatBubble({ role, content, isStreaming, timestamp }: Ch
             {coachingData.why && (
               <div className="flex flex-col gap-1 bg-white/5 p-3 rounded-xl border border-white/5 mt-1">
                 <span className="text-xs font-semibold text-casanova-muted uppercase tracking-wider">Why it works</span>
-                <p className="text-sm text-casanova-muted whitespace-pre-wrap leading-relaxed">{renderMarkdown(coachingData.why)}</p>
+                <p className="text-sm text-casanova-muted whitespace-pre-wrap leading-relaxed">{renderMarkdown(coachingData.why.replace(/^why it works[:\s]*/i, '').replace(/^why[:\s]*/i, ''))}</p>
               </div>
             )}
 
