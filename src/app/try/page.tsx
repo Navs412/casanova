@@ -90,10 +90,17 @@ export default function TryPage() {
         setTimeout(() => setShowSignup(true), 1500);
       }
     } catch {
+      const fallbackResponse = JSON.stringify({
+        observation: "That's an interesting approach. Here's what I notice — you're leading with a safe question.",
+        reframe: "Share something slightly unexpected about yourself first. It signals vulnerability, which invites the other person to match your depth.",
+        art: "Art of Vulnerability",
+        why: "It bypasses the surface level entirely by signalling openness.",
+        micro_script: "I have this theory that the best conversations happen when both people stop trying to be interesting. [Pause. Let them respond.]"
+      });
       setMessages(prev => [...prev, {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: "That's an interesting approach. Here's what I notice — you're leading with a safe question. Try this instead: share something slightly unexpected about yourself first. It signals vulnerability, which invites the other person to match your depth. Something like: \"I have this theory that the best conversations happen when both people stop trying to be interesting.\" Then pause. Let them respond. You've just used the Art of Vulnerability to bypass the surface level entirely.",
+        content: fallbackResponse,
       }]);
     } finally {
       setIsStreaming(false);

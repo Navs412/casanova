@@ -15,7 +15,7 @@ interface ChatInterfaceProps {
 
 const modeConfig: Record<string, { label: string; icon: string; color: string }> = {
   prep: { label: 'Prep', icon: '🎯', color: 'bg-casanova-accent-soft text-casanova-accent' },
-  pause: { label: 'Pause', icon: '⚡', color: 'bg-casanova-accent text-white' },
+  pause: { label: 'Pause', icon: '⚡', color: 'bg-[#E94560] text-white shadow-[0_0_10px_rgba(233,69,96,0.3)]' },
   debrief: { label: 'Debrief', icon: '📝', color: 'bg-casanova-accent-soft text-casanova-accent' },
   onboarding: { label: 'Onboarding', icon: '👋', color: 'bg-casanova-accent-soft text-casanova-accent' },
   simulation: { label: 'Simulation', icon: '🎭', color: 'bg-casanova-accent-soft text-casanova-accent' },
@@ -27,6 +27,7 @@ export default function ChatInterface({ sessionId, mode, initialMessages = [], o
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(30);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -41,6 +42,14 @@ export default function ChatInterface({ sessionId, mode, initialMessages = [], o
       inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 120) + 'px';
     }
   }, [input]);
+
+  // Pause mode timer
+  useEffect(() => {
+    if (mode === 'pause' && timeLeft > 0) {
+      const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+      return () => clearInterval(timer);
+    }
+  }, [mode, timeLeft]);
 
   const sendMessage = async (e: FormEvent) => {
     e.preventDefault();
@@ -120,23 +129,35 @@ export default function ChatInterface({ sessionId, mode, initialMessages = [], o
   };
 
   const config = modeConfig[mode] || modeConfig.prep;
+  const isPause = mode === 'pause';
 
   return (
-    <div className="flex flex-col h-screen bg-casanova-bg">
+    <div className={`flex flex-col h-screen ${isPause ? 'bg-[#121214]' : 'bg-casanova-bg'} transition-colors duration-500`}>
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-casanova-border/60 bg-white/95 backdrop-blur-lg sticky top-0 z-10">
+      <div className={`flex items-center justify-between px-4 py-3 border-b border-casanova-border/60 sticky top-0 z-10 ${isPause ? 'bg-[#1a1c23]' : 'bg-white/95 backdrop-blur-lg'}`}>
         <div className="flex items-center gap-2.5">
           <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${config.color}`}>
             <span>{config.icon}</span>
             {config.label}
           </span>
         </div>
-        <button
-          onClick={() => setShowEndConfirm(true)}
-          className="text-sm text-casanova-muted hover:text-casanova-accent transition-colors font-medium"
-        >
-          End Session
-        </button>
+        
+        {isPause && (
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <div className={`flex items-center justify-center font-mono font-black tracking-tight text-xl ${timeLeft <= 10 ? 'text-[#E94560] animate-pulse drop-shadow-[0_0_8px_rgba(233,69,96,0.8)]' : 'text-[#E94560] drop-shadow-[0_0_5px_rgba(233,69,96,0.4)]'}`}>
+              00:{timeLeft.toString().padStart(2, '0')}
+            </div>
+          </div>
+        )}
+
+        {!isPause && (
+          <button
+            onClick={() => setShowEndConfirm(true)}
+            className="text-sm text-casanova-muted hover:text-casanova-accent transition-colors font-medium"
+          >
+            End Session
+          </button>
+        )}
       </div>
 
       {/* Messages */}
@@ -158,13 +179,13 @@ export default function ChatInterface({ sessionId, mode, initialMessages = [], o
       </div>
 
       {/* Input area */}
-      <form onSubmit={sendMessage} className="px-4 py-3 border-t border-casanova-border/60 bg-white/95 backdrop-blur-lg">
+      <form onSubmit={sendMessage} className={`px-4 py-3 border-t bg-white/95 backdrop-blur-lg ${isPause ? 'bg-[#1a1c23]/95 border-[#E94560]/30 shadow-[0_-5px_15px_rgba(233,69,96,0.05)]' : 'border-casanova-border/60'}`}>
         <div className="max-w-2xl mx-auto">
-          {mode === 'pause' && (
-            <p className="text-xs text-casanova-muted mb-2 pl-1">Quick response mode — tell me what&apos;s happening</p>
+          {isPause && (
+            <p className="text-xs text-[#E94560] font-medium mb-2 pl-1 uppercase tracking-wider animate-pulse">Quick response mode</p>
           )}
           <div className="flex items-end gap-2">
-            <VoiceInput onTranscript={setInput} disabled={isStreaming} />
+            {!isPause && <VoiceInput onTranscript={setInput} disabled={isStreaming} />}
             <textarea
               ref={inputRef}
               value={input}
@@ -175,8 +196,12 @@ export default function ChatInterface({ sessionId, mode, initialMessages = [], o
                   sendMessage(e);
                 }
               }}
-              placeholder={mode === 'pause' ? "What's happening right now?" : "Type your message..."}
-              className="flex-1 px-4 py-3 rounded-2xl border border-casanova-border bg-casanova-bg text-casanova-text placeholder:text-casanova-muted/60 focus:outline-none focus:ring-2 focus:ring-casanova-accent/20 focus:border-casanova-accent/40 transition-all text-[15px] resize-none min-h-[46px] max-h-[120px] leading-relaxed"
+              placeholder={isPause ? "What's happening right now?" : "Type your message..."}
+              className={`flex-1 px-4 py-3 rounded-2xl border text-[15px] resize-none min-h-[46px] max-h-[120px] leading-relaxed transition-all ${
+                isPause 
+                  ? 'border-[#E94560]/40 bg-[#121214] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#E94560]/40 focus:border-[#E94560]' 
+                  : 'border-casanova-border bg-casanova-bg text-casanova-text placeholder:text-casanova-muted/60 focus:outline-none focus:ring-2 focus:ring-casanova-accent/20 focus:border-casanova-accent/40'
+              }`}
               rows={1}
               disabled={isStreaming}
             />
@@ -184,7 +209,11 @@ export default function ChatInterface({ sessionId, mode, initialMessages = [], o
               whileTap={{ scale: 0.9 }}
               type="submit"
               disabled={!input.trim() || isStreaming}
-              className="p-3 rounded-full bg-casanova-accent text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-casanova-accent/90 transition-all shadow-md shadow-casanova-accent/20 flex-shrink-0 mb-0.5"
+              className={`p-3 rounded-full text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md flex-shrink-0 mb-0.5 ${
+                isPause
+                  ? 'bg-[#E94560] hover:bg-[#E94560]/90 shadow-[#E94560]/30'
+                  : 'bg-casanova-accent hover:bg-casanova-accent/90 shadow-casanova-accent/20'
+              }`}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
