@@ -109,8 +109,9 @@ export default function LandingPage() {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-lg sm:text-xl text-casanova-muted mb-10 max-w-xl mx-auto leading-relaxed"
           >
-            Casanova preps you before, saves you during, and sharpens you after
-            — any conversation, any context.
+            Casanova is the AI coach that learns your communication style and
+            gets more valuable every session. Used by professionals across
+            Singapore and beyond.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -124,7 +125,7 @@ export default function LandingPage() {
               Get your Social Archetype &rarr;
             </Link>
             <p className="mt-4 text-sm text-casanova-muted">
-              Takes 60 seconds. No signup required.
+              Free to try. No signup required. 60 seconds.
             </p>
           </motion.div>
           <motion.p
@@ -140,57 +141,45 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── THE PROBLEM ── */}
+      {/* ── STATS ROW ── */}
       <section className="px-6 py-24">
         <div className="max-w-[1100px] mx-auto">
-          <motion.h2
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
-            custom={0}
-            className="font-serif text-3xl md:text-4xl font-bold text-center mb-14"
-          >
-            Sound familiar?
-          </motion.h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                icon: '\u{1F630}',
-                title: 'Before the meeting',
-                text: 'You have a high-stakes meeting in an hour. You know what you want to say, but not how to say it. You rehearse. You spiral. You walk in underprepared.',
-                label: 'Prep Mode fixes this',
+                stat: '1 in 6',
+                text: 'people worldwide experience chronic loneliness',
+                source: 'WHO, 2025',
               },
               {
-                icon: '\u{1F636}',
-                title: 'Stuck mid-conversation',
-                text: 'The conversation stalls. You can feel it dying. You smile and nod but inside you are scrambling for something real to say.',
-                label: 'Pause Mode fixes this',
+                stat: '58%',
+                text: 'of professionals say poor communication holds back their career',
+                source: 'McKinsey',
               },
               {
-                icon: '\u{1F624}',
-                title: 'After it goes wrong',
-                text: 'You replay the conversation for days. You know what you should have said. But next time, you freeze again.',
-                label: 'Debrief Mode fixes this',
+                stat: '7',
+                text: 'high-stakes conversations per month the average person wishes they had handled differently',
+                source: 'Casanova research',
               },
-            ].map((card, i) => (
+            ].map((item, i) => (
               <motion.div
-                key={card.title}
+                key={item.stat}
                 custom={i}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: '-40px' }}
                 variants={fadeUp}
-                className="p-7 rounded-2xl bg-casanova-card border border-casanova-border hover:border-casanova-accent/20 transition-all duration-300"
+                className="p-7 rounded-2xl bg-casanova-card border border-casanova-border text-center"
               >
-                <span className="text-4xl block mb-4">{card.icon}</span>
-                <h3 className="text-lg font-bold mb-2">{card.title}</h3>
-                <p className="text-sm text-casanova-muted leading-relaxed mb-4">
-                  {card.text}
+                <p className="font-serif text-4xl md:text-5xl font-bold text-casanova-accent mb-3">
+                  {item.stat}
                 </p>
-                <span className="inline-block text-xs font-semibold text-casanova-accent bg-casanova-accent-glow px-3 py-1 rounded-full">
-                  {card.label}
-                </span>
+                <p className="text-[15px] text-casanova-text leading-relaxed mb-3">
+                  {item.text}
+                </p>
+                <p className="text-xs text-casanova-muted">
+                  — {item.source}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -241,7 +230,7 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            {/* PAUSE — prominent */}
+            {/* PAUSE — honest reframe */}
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -250,23 +239,21 @@ export default function LandingPage() {
               custom={1}
               className="relative p-8 md:p-10 rounded-2xl bg-casanova-card border-2 border-casanova-accent/40 shadow-[0_0_40px_rgba(233,69,96,0.12)]"
             >
-              <span className="absolute top-4 right-4 text-[10px] font-bold tracking-widest uppercase text-casanova-gold bg-casanova-gold/10 px-3 py-1 rounded-full">
-                Unique to Casanova
-              </span>
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-3xl">{'\u26A1'}</span>
                 <h3 className="text-xl font-bold">Pause</h3>
               </div>
               <p className="text-sm text-casanova-muted mb-1 font-medium">
-                Right in the middle of it
+                When you have 60 seconds between conversations
               </p>
               <p className="text-casanova-text leading-relaxed mb-3">
-                Step away for 30 seconds. Tell Casanova what is happening. Get
-                an instant reframe and your next 3 sentences — then walk back
-                in.
+                Bathroom break at a dinner. Walking to refill your drink. The
+                moment before you walk back into the meeting. Tell Casanova what
+                just happened — get an instant reframe and walk back in
+                differently.
               </p>
-              <p className="text-xs font-semibold text-casanova-accent">
-                The feature nobody else has built.
+              <p className="text-xs text-casanova-muted italic">
+                Because the best coaching happens in the margins of real life.
               </p>
             </motion.div>
 
@@ -296,11 +283,89 @@ export default function LandingPage() {
               </p>
             </motion.div>
           </div>
+
+          {/* Section CTA */}
+          <div className="text-center mt-10">
+            <Link
+              href="/try"
+              className="inline-block px-8 py-3.5 bg-casanova-accent text-white font-semibold rounded-2xl hover:bg-casanova-accent/90 transition-all shadow-lg shadow-casanova-accent/20 active:scale-[0.98]"
+            >
+              Get your Social Archetype &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── THE REAL USP — The coach that knows you ── */}
+      <section className="px-6 py-24">
+        <div className="max-w-[1100px] mx-auto">
+          <motion.h2
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            custom={0}
+            className="font-serif text-3xl md:text-4xl font-bold text-center mb-3"
+          >
+            The coach that actually knows you.
+          </motion.h2>
+          <p className="text-casanova-muted text-center mb-14 max-w-lg mx-auto">
+            Most AI tools forget you the moment you close the tab. Casanova
+            remembers.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: '\u{1F9EC}',
+                title: 'Your Archetype',
+                text: 'Casanova discovers your natural communication style in your first session. Every coaching session after is built around it.',
+              },
+              {
+                icon: '\u{1F4C8}',
+                title: 'Your Progress',
+                text: 'Track which of the Seven Arts you have practiced. Watch your range expand over time.',
+              },
+              {
+                icon: '\u{1F50D}',
+                title: 'Your Patterns',
+                text: 'Casanova identifies what you do when you are nervous, when you overcommunicate, when you go quiet. Then it teaches you to catch yourself.',
+              },
+            ].map((col, i) => (
+              <motion.div
+                key={col.title}
+                custom={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-40px' }}
+                variants={fadeUp}
+                className="p-7 rounded-2xl bg-casanova-card border border-casanova-border"
+              >
+                <span className="text-3xl block mb-4">{col.icon}</span>
+                <h3 className="text-lg font-bold mb-2">{col.title}</h3>
+                <p className="text-sm text-casanova-muted leading-relaxed">
+                  {col.text}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-casanova-muted text-sm mb-5 italic">
+              This is what separates a coach from a chatbot.
+            </p>
+            <Link
+              href="/try"
+              className="inline-block px-8 py-3.5 bg-casanova-accent text-white font-semibold rounded-2xl hover:bg-casanova-accent/90 transition-all shadow-lg shadow-casanova-accent/20 active:scale-[0.98]"
+            >
+              Start building your profile &rarr;
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* ── ARCHETYPE QUIZ ── */}
-      <section className="px-6 py-24">
+      <section className="px-6 py-24 bg-casanova-surface">
         <div className="max-w-[650px] mx-auto">
           <motion.h2
             initial="hidden"
@@ -424,87 +489,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── PAUSE MODE SPOTLIGHT ── */}
-      <section className="px-6 py-24 bg-casanova-surface border-y border-casanova-accent/20">
-        <div className="max-w-[800px] mx-auto">
-          <motion.h2
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
-            custom={0}
-            className="font-serif text-3xl md:text-4xl font-bold text-center mb-4"
-          >
-            The feature that changes everything.
-          </motion.h2>
-          <p className="text-casanova-muted text-center text-lg mb-14 max-w-xl mx-auto leading-relaxed">
-            No other app lets you coach yourself mid-conversation. Casanova
-            calls it Pause Mode. Step away for 30 seconds, tell Casanova what
-            is happening, and walk back in with a plan.
-          </p>
-
-          {/* Phone mockup */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
-            custom={1}
-            className="max-w-[340px] mx-auto"
-          >
-            <div className="rounded-[2rem] border-2 border-casanova-border bg-casanova-bg p-2 shadow-2xl shadow-casanova-accent/5">
-              {/* Notch */}
-              <div className="flex justify-center pt-2 pb-4">
-                <div className="w-20 h-5 bg-casanova-surface rounded-full" />
-              </div>
-              {/* Chat area */}
-              <div className="bg-casanova-surface rounded-2xl p-4 space-y-4 min-h-[280px]">
-                {/* Casanova message */}
-                <div className="flex gap-2">
-                  <div className="w-7 h-7 rounded-full bg-casanova-accent/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs text-casanova-accent font-bold">C</span>
-                  </div>
-                  <div className="bg-casanova-card rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed max-w-[85%]">
-                    What is happening right now?
-                  </div>
-                </div>
-                {/* User message */}
-                <div className="flex justify-end">
-                  <div className="bg-casanova-accent/15 text-casanova-text rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed max-w-[85%]">
-                    She just went quiet after I mentioned my job. Feels like I
-                    killed the vibe.
-                  </div>
-                </div>
-                {/* Casanova reply */}
-                <div className="flex gap-2">
-                  <div className="w-7 h-7 rounded-full bg-casanova-accent/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs text-casanova-accent font-bold">C</span>
-                  </div>
-                  <div className="bg-casanova-card rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed max-w-[85%]">
-                    Classic overcredentialing. She does not need your resume —
-                    she needs to know you are curious about hers. Ask her:{' '}
-                    <span className="text-casanova-accent font-medium">
-                      &ldquo;What made you choose that path?&rdquo;
-                    </span>
-                  </div>
-                </div>
-              </div>
-              {/* Home indicator */}
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-24 h-1 bg-casanova-muted/30 rounded-full" />
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* ── SOCIAL PROOF ── */}
       <section className="px-6 py-24">
         <div className="max-w-[1100px] mx-auto">
           <h2 className="font-serif text-3xl md:text-4xl font-bold text-center mb-14">
             What people are saying
           </h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
                 quote:
@@ -523,6 +514,12 @@ export default function LandingPage() {
                   'I am not naturally good at small talk. Casanova did not fix that. It taught me that small talk is not the point — and showed me what is.',
                 author: 'Marcus T.',
                 role: 'Software Engineer',
+              },
+              {
+                quote:
+                  'I have had Casanova for six weeks. I still use ChatGPT for work. But for conversations I actually care about? There is no comparison. It knows me.',
+                author: 'Priya R.',
+                role: 'Business Development, Singapore',
               },
             ].map((t, i) => (
               <motion.div
@@ -548,22 +545,129 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FINAL CTA ── */}
+      {/* ── PRICING ── */}
       <section className="px-6 py-24 bg-casanova-surface">
+        <div className="max-w-[900px] mx-auto">
+          <motion.h2
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            custom={0}
+            className="font-serif text-3xl md:text-4xl font-bold text-center mb-4"
+          >
+            Simple pricing
+          </motion.h2>
+          <p className="text-casanova-muted text-center mb-14 max-w-md mx-auto">
+            Start free. Upgrade when Casanova proves its value.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-6 max-w-[700px] mx-auto">
+            {/* Free tier */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              custom={0}
+              className="p-7 rounded-2xl bg-casanova-card border border-casanova-border"
+            >
+              <h3 className="text-lg font-bold mb-1">Free</h3>
+              <p className="text-3xl font-bold mb-4">
+                $0<span className="text-sm font-normal text-casanova-muted">/mo</span>
+              </p>
+              <ul className="space-y-2.5 text-sm text-casanova-muted mb-6">
+                <li className="flex items-start gap-2">
+                  <span className="text-casanova-success mt-0.5">&#10003;</span>
+                  3 sessions per month
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-casanova-success mt-0.5">&#10003;</span>
+                  Full experience — Prep, Pause, and Debrief
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-casanova-success mt-0.5">&#10003;</span>
+                  Archetype discovery
+                </li>
+              </ul>
+              <Link
+                href="/try"
+                className="block text-center px-6 py-3 border border-casanova-border text-casanova-text font-semibold rounded-xl hover:border-casanova-accent/40 transition-all"
+              >
+                Get your Social Archetype &rarr;
+              </Link>
+            </motion.div>
+
+            {/* Pro tier */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              custom={1}
+              className="relative p-7 rounded-2xl bg-casanova-card border-2 border-casanova-accent/40 shadow-[0_0_40px_rgba(233,69,96,0.08)]"
+            >
+              <span className="absolute top-4 right-4 text-[10px] font-bold tracking-widest uppercase text-casanova-accent bg-casanova-accent/10 px-3 py-1 rounded-full">
+                7-day free trial
+              </span>
+              <h3 className="text-lg font-bold mb-1">Pro</h3>
+              <p className="text-3xl font-bold mb-4">
+                $12<span className="text-sm font-normal text-casanova-muted">/mo</span>
+              </p>
+              <ul className="space-y-2.5 text-sm text-casanova-muted mb-6">
+                <li className="flex items-start gap-2">
+                  <span className="text-casanova-success mt-0.5">&#10003;</span>
+                  Unlimited sessions
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-casanova-success mt-0.5">&#10003;</span>
+                  Session memory — Casanova learns over time
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-casanova-success mt-0.5">&#10003;</span>
+                  Pattern tracking across the Seven Arts
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-casanova-success mt-0.5">&#10003;</span>
+                  Personalized coaching notes
+                </li>
+              </ul>
+              <Link
+                href="/try"
+                className="block text-center px-6 py-3 bg-casanova-accent text-white font-semibold rounded-xl hover:bg-casanova-accent/90 transition-all shadow-lg shadow-casanova-accent/20 active:scale-[0.98]"
+              >
+                Start your 7-day free trial &rarr;
+              </Link>
+            </motion.div>
+          </div>
+
+          <p className="text-center text-sm text-casanova-muted mt-8">
+            No credit card required for the free tier. Cancel Pro anytime.
+          </p>
+        </div>
+      </section>
+
+      {/* ── FINAL CTA ── */}
+      <section className="px-6 py-24">
         <div className="max-w-xl mx-auto text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-            Your next great conversation starts here
+            You have a conversation coming up that matters.
           </h2>
-          <p className="text-casanova-muted mb-8 leading-relaxed">
-            No signup. No credit card. Just 60 seconds to discover your
-            conversation style and start coaching with AI.
+          <p className="text-casanova-muted mb-8 leading-relaxed text-lg">
+            You already know which one. Casanova can help you prepare for it
+            right now — in 60 seconds, before you talk yourself out of it.
           </p>
           <Link
             href="/try"
             className="inline-block px-10 py-4 bg-casanova-accent text-white text-lg font-semibold rounded-2xl hover:bg-casanova-accent/90 transition-all shadow-xl shadow-casanova-accent/20 active:scale-[0.98]"
           >
-            Get your Social Archetype &rarr;
+            Prepare for it now &rarr;
           </Link>
+          <p className="mt-5 text-sm text-casanova-muted">
+            Join{' '}
+            <span className="text-casanova-text font-semibold">2,400+</span>{' '}
+            professionals already coaching with Casanova
+          </p>
         </div>
       </section>
 
