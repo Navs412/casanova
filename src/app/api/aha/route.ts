@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { rateLimit } from '@/lib/rate-limit';
 
 const CASANOVA_SYSTEM_PROMPT = `You are Casanova, a personal communication skills coach. You teach the one skill no school teaches: how to genuinely connect with another human being.
 
@@ -26,6 +27,16 @@ const FALLBACK_RESPONSES = [
 
 export async function POST(request: Request) {
   try {
+    // Rate limit: 10 requests per IP per minute on the free /try endpoint
+    const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'anonymous';
+    const limit = rateLimit(`aha:${ip}`, 10, 60_000);
+    if (!limit.allowed) {
+      return new Response(JSON.stringify({ error: 'Too many requests. Please wait a moment.' }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json', 'Retry-After': String(Math.ceil(limit.resetIn / 1000)) },
+      });
+    }
+
     const { message, history } = await request.json();
 
     if (!message || typeof message !== 'string') {
