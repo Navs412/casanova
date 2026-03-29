@@ -1,58 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import type { Session, Message } from '@/types';
-
-// Mock data for development
-const mockSession: Session = {
-  id: 'sess_mock_001',
-  user_id: 'user_mock_001',
-  mode: 'prep',
-  context: 'First date at a coffee shop this Saturday',
-  relationship_type: 'romantic',
-  arts_used: ['question', 'attunement'],
-  summary: null,
-  rating: null,
-  created_at: '2026-03-25T18:00:00Z',
-  ended_at: null,
-};
-
-const mockMessages: Message[] = [
-  {
-    id: 'msg_001',
-    session_id: 'sess_mock_001',
-    role: 'assistant',
-    content:
-      "Welcome to your prep session. You mentioned a first date at a coffee shop — let's make sure you walk in feeling grounded and magnetic. What's on your mind about it?",
-    is_ephemeral: false,
-    created_at: '2026-03-25T18:00:05Z',
-  },
-  {
-    id: 'msg_002',
-    session_id: 'sess_mock_001',
-    role: 'user',
-    content:
-      "I always run out of things to say after the first 20 minutes. The conversation just dies.",
-    is_ephemeral: false,
-    created_at: '2026-03-25T18:00:45Z',
-  },
-  {
-    id: 'msg_003',
-    session_id: 'sess_mock_001',
-    role: 'assistant',
-    content:
-      "That's more common than you think, and it's actually a sign you're relying on topics instead of curiosity. Let's practice the Art of the Question — instead of asking 'what do you do?', try following the energy of what they just said. Want to try a quick simulation?",
-    is_ephemeral: false,
-    created_at: '2026-03-25T18:01:10Z',
-  },
-  {
-    id: 'msg_004',
-    session_id: 'sess_mock_001',
-    role: 'user',
-    content: "Yeah, let's do it.",
-    is_ephemeral: false,
-    created_at: '2026-03-25T18:01:30Z',
-  },
-];
 
 export async function GET(
   _request: NextRequest,
@@ -71,33 +18,25 @@ export async function GET(
 
   const { id } = await params;
 
-  // TODO: Connect to real Supabase instance
-  // const { data: session, error } = await supabase
-  //   .from('sessions')
-  //   .select('*')
-  //   .eq('id', id)
-  //   .eq('user_id', user.id)
-  //   .single();
-  //
-  // if (error || !session) {
-  //   return NextResponse.json({ error: 'Session not found' }, { status: 404 });
-  // }
-  //
-  // const { data: messages } = await supabase
-  //   .from('messages')
-  //   .select('*')
-  //   .eq('session_id', id)
-  //   .eq('is_ephemeral', false)
-  //   .order('created_at', { ascending: true });
+  const { data: session, error } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single();
 
-  // Mock: pretend we found the session
-  const session: Session = { ...mockSession, id, user_id: user.id };
-  const messages: Message[] = mockMessages.map((m) => ({
-    ...m,
-    session_id: id,
-  }));
+  if (error || !session) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
 
-  return NextResponse.json({ session, messages });
+  const { data: messages } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('session_id', id)
+    .eq('is_ephemeral', false)
+    .order('created_at', { ascending: true });
+
+  return NextResponse.json({ session, messages: messages ?? [] });
 }
 
 export async function PATCH(
@@ -135,56 +74,90 @@ export async function PATCH(
     }
   }
 
-  // TODO: Connect to real Supabase instance
-  // 1. Verify session belongs to user and is not already ended
-  // const { data: session, error } = await supabase
-  //   .from('sessions')
-  //   .select('*')
-  //   .eq('id', id)
-  //   .eq('user_id', user.id)
-  //   .is('ended_at', null)
-  //   .single();
-  //
-  // if (error || !session) {
-  //   return NextResponse.json(
-  //     { error: 'Session not found or already ended' },
-  //     { status: 404 }
-  //   );
-  // }
-  //
-  // 2. Set ended_at and optional rating
-  // const now = new Date().toISOString();
-  // const { data: updated } = await supabase
-  //   .from('sessions')
-  //   .update({
-  //     ended_at: now,
-  //     ...(body.rating !== undefined && { rating: body.rating }),
-  //   })
-  //   .eq('id', id)
-  //   .select()
-  //   .single();
-  //
-  // 3. Purge ephemeral messages for this session
-  // await supabase
-  //   .from('messages')
-  //   .delete()
-  //   .eq('session_id', id)
-  //   .eq('is_ephemeral', true);
-  //
-  // 4. Increment user's session counts
-  // await supabase.rpc('increment_session_count', { user_id: user.id });
+  // Verify session belongs to user and is not already ended
+  const { data: existingSession, error: fetchError } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .is('ended_at', null)
+    .single();
 
+  if (fetchError || !existingSession) {
+    return NextResponse.json(
+      { error: 'Session not found or already ended' },
+      { status: 404 }
+    );
+  }
+
+  // End the session
   const now = new Date().toISOString();
-  const endedSession: Session = {
-    ...mockSession,
-    id,
-    user_id: user.id,
-    ended_at: now,
-    rating: body.rating ?? null,
-  };
+  const { data: updated, error: updateError } = await supabase
+    .from('sessions')
+    .update({
+      ended_at: now,
+      ...(body.rating !== undefined && { rating: body.rating }),
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (updateError) {
+    return NextResponse.json({ error: updateError.message }, { status: 500 });
+  }
+
+  // Purge ephemeral messages
+  const { count } = await supabase
+    .from('messages')
+    .delete({ count: 'exact' })
+    .eq('session_id', id)
+    .eq('is_ephemeral', true);
+
+  // Increment user's session counts
+  await supabase.rpc('increment_session_count', { user_id: user.id });
 
   return NextResponse.json({
-    session: endedSession,
-    ephemeral_messages_purged: 2,
+    session: updated,
+    ephemeral_messages_purged: count ?? 0,
   });
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  // Verify session belongs to user
+  const { data: session, error: fetchError } = await supabase
+    .from('sessions')
+    .select('id')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single();
+
+  if (fetchError || !session) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
+  // Delete messages first, then the session
+  await supabase.from('messages').delete().eq('session_id', id);
+  const { error: deleteError } = await supabase.from('sessions').delete().eq('id', id);
+
+  if (deleteError) {
+    return NextResponse.json({ error: deleteError.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
 }
