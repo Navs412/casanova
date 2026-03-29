@@ -1,22 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/server';
-import { buildSystemPrompt } from '@/lib/system-prompt';
-import { detectArts } from '@/lib/arts-detector';
+import { parseCoachingResponse } from '@/lib/coaching-parser';
+
+const CASANOVA_SYSTEM_PROMPT = `You are Casanova, a personal communication skills coach. You teach the one skill no school teaches: how to genuinely connect with another human being.
+
+You coach across ALL relationship types: professional, platonic, romantic, familial. The principles are universal.
+
+When coaching, ALWAYS structure your response in this exact JSON format:
+{
+  "observation": "What the user did — specific, not generic. Max 2 sentences.",
+  "reframe": "A better approach. Concrete and actionable. Max 2 sentences.",
+  "art": "The name of the Seven Art being used: Question, Suggestion, Rhythm, Attunement, Vulnerability, Detail, or Absence",
+  "why": "The psychological principle behind why this works. Max 2 sentences.",
+  "micro_script": "Optional: 1-2 exact sentences they can say. Only include if helpful."
+}
+
+Mode-specific behavior:
+- PREP: Help them prepare. Give specific openers, questions, strategies for their situation.
+- PAUSE: Under 100 words total. Fast, direct, 1-2 sentences max per field. They are mid-conversation.
+- DEBRIEF: Analyze what happened. Identify patterns. Build a coaching insight for next time.
+
+Never be preachy. Never be generic. Sound like a brilliant friend who understands human connection deeply.`;
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-
-    // Auth check
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
     const { session_id, message, is_ephemeral } = body as {
       session_id: string;
@@ -31,112 +40,157 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Validate session belongs to user (replace with real DB query)
-    const session = {
-      id: session_id,
-      user_id: user.id,
-      mode: 'prep' as string,
-      scenario_id: 'mock-scenario-1',
-    };
+    const isAhaSession = session_id === 'aha-moment';
 
-    if (session.user_id !== user.id) {
-      return NextResponse.json(
-        { error: 'Session not found or access denied' },
-        { status: 404 }
-      );
+    // Auth check — allow unauthenticated for aha-moment sessions
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user && !isAhaSession) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // TODO: Store user message in database
-    const _userMessage = {
-      id: crypto.randomUUID(),
-      session_id,
-      role: 'user' as const,
-      content: message,
-      is_ephemeral: is_ephemeral ?? false,
-      created_at: new Date().toISOString(),
-    };
+    // Build personalization context
+    let personalization = '';
 
-    // TODO: Retrieve previous messages for context (replace with real DB query)
-    const _previousMessages = [
-      { role: 'user' as const, content: message },
-    ];
+    if (user && !isAhaSession) {
+      // Fetch profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('archetype, arts_practiced, total_sessions')
+        .eq('id', user.id)
+        .single();
 
-    // TODO: Retrieve user profile for personalization (replace with real DB query)
-    const userProfile = {
-      archetype: 'enigma' as const,
-      arts_practiced: ['question'] as string[],
-      session_count: 5,
-    };
+      if (profile) {
+        const parts: string[] = [];
+        if (profile.archetype) parts.push(`User archetype: ${profile.archetype}.`);
+        if (profile.arts_practiced?.length) parts.push(`Arts practiced: ${profile.arts_practiced.join(', ')}.`);
+        if (profile.total_sessions != null) parts.push(`Total sessions: ${profile.total_sessions}.`);
+        if (parts.length) personalization = '\n\n## USER CONTEXT\n' + parts.join(' ');
+      }
 
-    // Build system prompt with personalization
-    const systemPrompt = buildSystemPrompt({
-      archetype: userProfile.archetype,
-      artsPracticed: userProfile.arts_practiced,
-      sessionCount: userProfile.session_count,
-      mode: session.mode,
+      // Store user message
+      await supabase.from('messages').insert({
+        session_id,
+        role: 'user',
+        content: message,
+        is_ephemeral: is_ephemeral ?? false,
+      });
+    }
+
+    // Fetch session mode
+    let mode = 'prep';
+    if (!isAhaSession) {
+      const { data: session } = await supabase
+        .from('sessions')
+        .select('mode')
+        .eq('id', session_id)
+        .single();
+      if (session?.mode) mode = session.mode;
+    }
+
+    const systemPrompt = CASANOVA_SYSTEM_PROMPT + personalization +
+      (mode === 'pause' ? '\n\n[PAUSE MODE ACTIVE] Keep it under 100 words. They are mid-conversation.' : '') +
+      (mode === 'debrief' ? '\n\n[DEBRIEF MODE ACTIVE] Analyze what happened and build coaching insights.' : '');
+
+    // Fetch last 10 messages for context
+    const conversationMessages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+
+    if (!isAhaSession) {
+      const { data: history } = await supabase
+        .from('messages')
+        .select('role, content')
+        .eq('session_id', session_id)
+        .order('created_at', { ascending: true })
+        .limit(10);
+
+      if (history) {
+        for (const msg of history) {
+          if (msg.role === 'user' || msg.role === 'assistant') {
+            conversationMessages.push({ role: msg.role, content: msg.content });
+          }
+        }
+      }
+    }
+
+    // If we didn't get messages from DB (or aha session), add current message
+    if (conversationMessages.length === 0 || conversationMessages[conversationMessages.length - 1]?.content !== message) {
+      conversationMessages.push({ role: 'user', content: message });
+    }
+
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'AI service not configured' }, { status: 503 });
+    }
+
+    const client = new Anthropic({ apiKey });
+    const anthropicStream = await client.messages.stream({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: conversationMessages,
     });
 
-    // If mode is "pause", append pause instruction
-    const finalSystemPrompt =
-      session.mode === 'pause'
-        ? `${systemPrompt}\n\n[PAUSE MODE]: The user has requested a moment to reflect. Gently encourage introspection without pushing forward. Let the silence breathe.`
-        : systemPrompt;
-
-    // Track the full response for post-stream processing
     let fullResponse = '';
-
-    // TODO: Replace with real AI API call (KRONA)
-    const mockCoachingResponse =
-      `I notice something interesting in what you just shared. ` +
-      `There's a pattern here — you're approaching this interaction ` +
-      `with a desire to be understood, which is natural, but what if ` +
-      `we flipped the script? Instead of seeking validation, what if ` +
-      `you led with genuine curiosity about the other person's world? ` +
-      `Try this: next time you're in that situation, pause for a beat ` +
-      `before responding. Let the silence do some of the heavy lifting. ` +
-      `Then ask a question that shows you were truly listening — not ` +
-      `just waiting for your turn to speak. That's where real connection begins.`;
-
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // Simulate token-by-token streaming
-          const words = mockCoachingResponse.split(' ');
-
-          for (let i = 0; i < words.length; i++) {
-            const token = i === 0 ? words[i] : ` ${words[i]}`;
-            fullResponse += token;
-            controller.enqueue(encoder.encode(token));
-
-            // Simulate natural typing delay
-            await new Promise((resolve) => setTimeout(resolve, 20));
+          for await (const event of anthropicStream) {
+            if (
+              event.type === 'content_block_delta' &&
+              event.delta.type === 'text_delta'
+            ) {
+              fullResponse += event.delta.text;
+              controller.enqueue(encoder.encode(event.delta.text));
+            }
           }
 
-          // Post-stream processing: detect arts used in the response
-          const detectedArts = detectArts(fullResponse);
+          // Parse coaching response for detected art
+          const parsed = parseCoachingResponse(fullResponse);
+          const detectedArt = parsed.art ? [parsed.art.toLowerCase()] : [];
 
-          // Send a final metadata chunk separated by a delimiter
+          // Send metadata
           const metadata = JSON.stringify({
             done: true,
-            detected_arts: detectedArts,
+            detected_arts: detectedArt,
             session_id,
           });
           controller.enqueue(encoder.encode(`\n__META__${metadata}`));
 
-          // TODO: Store assistant message in database
-          const _assistantMessage = {
-            id: crypto.randomUUID(),
-            session_id,
-            role: 'assistant' as const,
-            content: fullResponse,
-            detected_arts: detectedArts,
-            created_at: new Date().toISOString(),
-          };
+          // Store assistant message
+          if (user && !isAhaSession) {
+            await supabase.from('messages').insert({
+              session_id,
+              role: 'assistant',
+              content: fullResponse,
+              is_ephemeral: false,
+            });
+
+            // Update session arts_used
+            if (detectedArt.length > 0) {
+              const { data: currentSession } = await supabase
+                .from('sessions')
+                .select('arts_used')
+                .eq('id', session_id)
+                .single();
+
+              if (currentSession) {
+                const existing = currentSession.arts_used || [];
+                const merged = [...new Set([...existing, ...detectedArt])];
+                await supabase
+                  .from('sessions')
+                  .update({ arts_used: merged })
+                  .eq('id', session_id);
+              }
+            }
+          }
 
           controller.close();
         } catch (err) {
+          console.error('Stream error:', err);
           controller.error(err);
         }
       },
