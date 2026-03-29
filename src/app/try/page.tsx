@@ -86,7 +86,7 @@ export default function TryPage() {
       setStreamingContent('');
       setExchangeCount(prev => prev + 1);
 
-      if (exchangeCount >= 2) {
+      if (exchangeCount >= 3) {
         setTimeout(() => setShowSignup(true), 1500);
       }
     } catch {
@@ -204,7 +204,7 @@ export default function TryPage() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && sendMessage()}
-              placeholder="Type your response..."
+              placeholder={exchangeCount === 0 ? "Type your response..." : "Ask a follow-up, try a different approach, or ask for the exact words..."}
               className="flex-1 px-4 py-3 rounded-full border border-casanova-border bg-casanova-bg text-casanova-text placeholder:text-casanova-muted/60 focus:outline-none focus:ring-2 focus:ring-casanova-accent/20 focus:border-casanova-accent/40 transition-all text-[15px]"
               disabled={isStreaming}
             />
